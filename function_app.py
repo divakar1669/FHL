@@ -20,7 +20,7 @@ def cri_hack(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
     else:
         return func.HttpResponse(
-             "good day !!!",
+             "~ Wishing you a great day ahead !!! ~ Divakar",
              status_code=200  
         )
     
@@ -57,6 +57,6 @@ def subscribe(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
     else:
         return func.HttpResponse(
-             "good day !!!",
+             "~ Wishing you a great day ahead !!! ~",
              status_code=200  
         )
