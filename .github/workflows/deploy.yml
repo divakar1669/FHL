@@ -6,7 +6,7 @@ on:
 env:
   AZURE_FUNCTIONAPP_NAME: '1js-hackathon-cri-ai'   # your Azure Function App name
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'              # path to your function app project
-  PYTHON_VERSION: '3.10'                           # Python version
+  PYTHON_VERSION: '3.12'                           # Python version
 
 jobs:
   build-and-deploy:
@@ -22,13 +22,13 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    # Optional: run tests or lint before deploy
-    # - name: 'Install dependencies for testing'
-    #   run: |
-    #     python -m pip install --upgrade pip
-    #     pip install -r requirements.txt
-    # - name: 'Run Tests'
-    #   run: pytest
+    - name: 'Install dependencies into .python_packages'
+      shell: bash
+      run: |
+        pushd '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+        popd
 
     - name: 'Deploy to Azure Functions'
       uses: Azure/functions-action@v1
@@ -37,5 +37,5 @@ jobs:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-        scm-do-build-during-deployment: true
-        enable-oryx-build: true
+        scm-do-build-during-deployment: false
+        enable-oryx-build: false
