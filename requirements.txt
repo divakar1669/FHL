@@ -6,3 +6,6 @@ azure-functions
 requests>=2.31.0
 python-dotenv>=1.0.1
 openai>=1.40.0
+azure-kusto-ingest
+azure-identity
+azure-kusto-data
