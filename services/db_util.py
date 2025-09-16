@@ -1,18 +1,22 @@
 import logging
-import azure.functions as func
-from azure.kusto.data import KustoConnectionStringBuilder
-from azure.kusto.ingest import QueuedIngestClient, IngestionProperties, DataFormat
-import io
 import json
+import io
+import azure.functions as func
+
+from azure.kusto.ingest import IngestionProperties, QueuedIngestClient 
+from azure.kusto.data import KustoConnectionStringBuilder
+
+from azure.kusto.data import DataFormat
 
 
-def ingest_data_to_kusto():
+
+def insertData(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Processing Kusto ingestion request.')
 
     try:
         # Your data
-        data_to_ingest = {
-            "id": "7e753f2c-e1c5-442d-a16f-1f061e89326f",
+        data_to_ingest = [ {
+            "id": "7e753f2c-e1c5-442d-a16f-132234",
             "TeamsLink": "https://teams.microsoft.com/l/message/1",
             "MessageId": "msg_101",
             "ChannelId": "channel_abc",
@@ -21,19 +25,23 @@ def ingest_data_to_kusto():
             "CreationTime": "2025-09-15T10:00:00.000Z",
             "Tags": "frontend",
             "GroupTag": "WebApp"
-        }
+        }] 
+        
+        logging.info("starting data preparation for ingestion. Data: %s", data_to_ingest)
 
-        # Convert to JSON bytes stream
-        json_str = json.dumps([data_to_ingest])  # wrap in list for JSON ingestion
-        json_bytes = io.BytesIO(json_str.encode('utf-8'))
+
+        json_data_list = data_to_ingest
+
+        compressed_stream = io.StringIO('\n'.join(json.dumps(record) for record in json_data_list))
+        logging.info("Data prepared for ingestion.")
 
         # Kusto configuration
-        cluster_uri = "https://cri-db.centralindia.kusto.windows.net"
+        cluster_uri = "https://ingest-cri-db.centralindia.kusto.windows.net"
         database_name = "CRI_DB"
         table_name = "CRI_Data"
-        client_id = "<client_id>"
-        client_secret = "<client_secret>"
-        tenant_id = "<tenant_id>"
+        client_id = "7674cdd0-a013-4768-8368-ad99caa5c4af"
+        client_secret = "4T68Q~Uo3uOkvKn6moGfytqLkvltxzXaJMOcVb_k"
+        tenant_id = "47cff186-6705-46a6-9834-685413ada769"
 
         # Authentication
         kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(
@@ -43,15 +51,21 @@ def ingest_data_to_kusto():
         # Create ingestion client
         ingest_client = QueuedIngestClient(kcsb)
 
+        logging.info("Ingestion client created.")
+
         # Ingestion properties
         ingestion_props = IngestionProperties(
             database=database_name,
             table=table_name,
-            data_format=DataFormat.JSON
+            data_format=DataFormat.JSON,
         )
 
+        logging.info(f"Ingestion properties set. {ingestion_props} Starting ingestion... {compressed_stream}")
+        logging.info(f"Starting ingestion of compressed data...")
+
+
         # Ingest data
-        ingest_client.ingest_from_stream(json_bytes, ingestion_properties=ingestion_props)
+        ingest_client.ingest_from_stream(compressed_stream, ingestion_properties=ingestion_props)
 
         return func.HttpResponse(f"Data ingested successfully into {table_name}!", status_code=200)
 

@@ -1,8 +1,9 @@
 import azure.functions as func
 import logging
+import logging
 import azure.functions as func
-import requests
-from services.db_util import ingest_data_to_kusto
+from services.db_util import insertData
+
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 @app.route(route="cri_hack")
@@ -50,11 +51,8 @@ def subscribe(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="test_diva")
 def appendData(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python timer trigger function started to ingest data via REST API.')
-
+    logging.info('Python HTTP trigger function processed a request.')
     try:
-        ingest_data_to_kusto()
-        return func.HttpResponse("Data ingestion initiated successfully.", status_code=200)
+        return insertData(req)
     except Exception as e:
-        logging.error(f"Error during data ingestion: {e}")
-        return func.HttpResponse(f"Error during data ingestion: {e}", status_code=500)
+        return func.HttpResponse(f"Error: {str(e)}", status_code=500)
