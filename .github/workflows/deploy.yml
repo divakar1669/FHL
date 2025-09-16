@@ -25,16 +25,14 @@ jobs:
     - name: 'Install dependencies into .python_packages'
       shell: bash
       run: |
-        pushd '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         python -m pip install --upgrade pip
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
-        popd
 
     - name: 'Create deployment package'
       run: |
         cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        zip -r ../app.zip .
-        cd ..
+        zip -r $GITHUB_WORKSPACE/app.zip .
 
     - name: 'Deploy via ZipDeploy'
       uses: azure/webapps-deploy@v2
