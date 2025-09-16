@@ -12,31 +12,29 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment: dev
-
     steps:
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@v3
 
-    - name: 'Set up Python ${{ env.PYTHON_VERSION }}'
+    - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
       uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: 'Install dependencies into .python_packages'
+    - name: 'Resolve Project Dependencies Using Pip'
       shell: bash
       run: |
-        cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         python -m pip install --upgrade pip
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+        popd
 
-    - name: 'Create deployment package'
-      run: |
-        cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        zip -r $GITHUB_WORKSPACE/app.zip .
-
-    - name: 'Deploy via ZipDeploy'
-      uses: azure/webapps-deploy@v2
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-        package: app.zip
+        # scm-do-build-during-deployment: true
+        # enable-oryx-build: true
