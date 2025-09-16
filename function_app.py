@@ -21,5 +21,5 @@ def cri_hack(req: func.HttpRequest) -> func.HttpResponse:
     else:
         return func.HttpResponse(
              "good day !!!",
-             status_code=200
+             status_code=200  
         )
