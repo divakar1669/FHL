@@ -5,3 +5,4 @@ openai>=1.40.0
 azure-kusto-ingest
 azure-identity
 azure-kusto-data
+dotenv

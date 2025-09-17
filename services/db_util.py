@@ -7,6 +7,7 @@ from azure.kusto.ingest import IngestionProperties, QueuedIngestClient
 from azure.kusto.data import KustoConnectionStringBuilder
 
 from azure.kusto.data import DataFormat
+from config.config import KUSTO_CLUSTER_URL, database_name, table_name, client_id, client_secret, tenant_id
 
 
 
@@ -16,7 +17,7 @@ def insertData(req: func.HttpRequest) -> func.HttpResponse:
     try:
         # Your data
         data_to_ingest = [ {
-            "id": "7e753f2c-e1c5-442d-a16f-132234",
+            "id": "7e753f2c-e1c5-442d-a16f-132264",
             "TeamsLink": "https://teams.microsoft.com/l/message/1",
             "MessageId": "msg_101",
             "ChannelId": "channel_abc",
@@ -24,7 +25,7 @@ def insertData(req: func.HttpRequest) -> func.HttpResponse:
             "ShortDescription": "Login page is down",
             "CreationTime": "2025-09-15T10:00:00.000Z",
             "Tags": "frontend",
-            "GroupTag": "WebApp"
+            "GroupTag": "Test apss",
         }] 
         
         logging.info("starting data preparation for ingestion. Data: %s", data_to_ingest)
@@ -36,17 +37,16 @@ def insertData(req: func.HttpRequest) -> func.HttpResponse:
         logging.info("Data prepared for ingestion.")
 
         # Kusto configuration
-        cluster_uri = "https://ingest-cri-db.centralindia.kusto.windows.net"
-        database_name = "CRI_DB"
-        table_name = "CRI_Data"
-        client_id = "7674cdd0-a013-4768-8368-ad99caa5c4af"
-        client_secret = "4T68Q~Uo3uOkvKn6moGfytqLkvltxzXaJMOcVb_k"
-        tenant_id = "47cff186-6705-46a6-9834-685413ada769"
+        cluster_uri = KUSTO_CLUSTER_URL
+
+
+        logging.info(f"Kusto configuration set. {cluster_uri}, {database_name}, {table_name}, {client_id}, {client_secret}, {tenant_id}")
 
         # Authentication
         kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(
             cluster_uri, client_id, client_secret, tenant_id
         )
+        print(cluster_uri, database_name, table_name, client_id, client_secret, tenant_id)
 
         # Create ingestion client
         ingest_client = QueuedIngestClient(kcsb)

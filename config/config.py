@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-
 # Load .env file
 load_dotenv()
 
@@ -21,5 +20,10 @@ AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 AZURE_OPENAI_API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2024-05-01-preview")
 
 
-KUSTO_CLUSTER_URI = os.getenv("KUSTO_CLUSTER_URI")
+KUSTO_CLUSTER_URL = os.getenv("KUSTO_CLUSTER_URL")
+database_name = os.getenv("database_name")
+table_name = os.getenv("table_name")
+client_id = os.getenv("client_id")
+client_secret = os.getenv("client_secret")
+tenant_id = os.getenv("tenant_id")
 
