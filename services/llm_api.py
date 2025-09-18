@@ -45,19 +45,18 @@ def summarize_and_tag(post_data: dict) -> (str, list):
         
     Tag List: 
         Categories:
-            - Pipelines & Build: [PR Wait Time, PR Completion Time, PR Last Iteration Reliability, PR Pipeline Experience, CI Pipeline Experience, Patch Pipeline Experience, PR, CI & Patch Pipeline Reliability, Build Reliability and Correctness, Build Infrastructure, Artifact Lead Time, Build & Dependencies, Pipeline Management, Publishing to NPM/Nuget]
-
-            - Reliability & Performance: [Outer Loop Performance, Inner-Loop Performance, yarn start, yarn install, yarn fast, CI Perf, Codespaces Reliability, Codespaces Stability, Deployment Pipeline Reliability, Test Automation, Flaky Test Detection & Triage, Non-Intentional Visual Diffs in PR, Live Site]
-
-            - Developer Experience: [GitHub Copilot Usage, VS Code IntelliSense/Debugging Experience, Create New Packages, Getting Started with 1JS, 1JS Documentation, 1JS Onboarding, Deployment and AI-Assisted Development]
-
-            - Operations & Incidents: [Monitoring & Alerting, Incident Handling, Retrospectives & Repair Items, Customer Reported Incidents (CRI)]
-
-            - Security & Compliance: [Compliance and Security, Common Dependency Updates, Security Dependency Tooling]
-
-            - Codespaces: [Codespaces, Pipelines & Dev Environments]
-            
-            - Miscellaneous: [AGILITY, SAD, OCE Rotation & Training, 1DAG, Others]
+            Reliability
+            PR Pipeline
+            Performance
+            Codespaces
+            Test Automation
+            Build and Release
+            Security
+            Publish Npm /NuGet Packages
+            Documentation
+            Git Operations
+            Others
+            Not Related to 1JS
     
     Output format:  
     Very important Respond only in JSON structure as mentioned below without any additional text or formatting :
