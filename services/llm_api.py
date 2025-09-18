@@ -52,14 +52,13 @@ def summarize_and_tag(post_data: dict) -> (str, list):
             PR Pipeline - [ 1PipeLine PR , 1Pipeline CI , E2E Test Pipeline , Other Pipeline Issues ]  
             Codespaces
             Test Automation - [ E2E Tests , Unit Tests , Component Tests , Flaky Tests , Test Coverage ]
-            Build and Release   
-            Security
-            Publish Npm /NuGet Packages
-            1JS - Documentation
+            Build and Release
+            Security - [ Application Security , Dependency Updates , Security Incident Response ]
+            Publish Npm /NuGet Packages 
+            1JS - Documentation - [ Test Automation Docs , 1JS Onboarding Docs , Codespaces Docs , 1JS Contribution Guide , 1JS Architecture Docs , 1JS Best Practices ]
             Git Operations
             Others
             Not Related to 1JS
-            
     
     Output format:  
     Very important Respond only in JSON structure as mentioned below without any additional text or formatting :
