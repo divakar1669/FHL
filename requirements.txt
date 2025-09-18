@@ -6,3 +6,4 @@ azure-kusto-ingest
 azure-identity
 azure-kusto-data
 dotenv
+bs4

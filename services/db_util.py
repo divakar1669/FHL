@@ -11,22 +11,12 @@ from config.config import KUSTO_CLUSTER_URL, database_name, table_name, client_i
 
 
 
-def insertData(req: func.HttpRequest) -> func.HttpResponse:
+def insertData(json_data: dict) -> func.HttpResponse:
     logging.info('Processing Kusto ingestion request.')
 
     try:
         # Your data
-        data_to_ingest = [ {
-            "id": "7e753f2c-e1c5-442d-a16f-132264",
-            "TeamsLink": "https://teams.microsoft.com/l/message/1",
-            "MessageId": "msg_101",
-            "ChannelId": "channel_abc",
-            "AdoWorkItemUrl": "https://dev.azure.com/org/proj/_workitems/edit/101",
-            "ShortDescription": "Login page is down",
-            "CreationTime": "2025-09-15T10:00:00.000Z",
-            "Tags": "frontend",
-            "GroupTag": "Test apss",
-        }] 
+        data_to_ingest = [json_data]
         
         logging.info("starting data preparation for ingestion. Data: %s", data_to_ingest)
 
@@ -46,7 +36,8 @@ def insertData(req: func.HttpRequest) -> func.HttpResponse:
         kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(
             cluster_uri, client_id, client_secret, tenant_id
         )
-        print(cluster_uri, database_name, table_name, client_id, client_secret, tenant_id)
+        
+        logging.info(f"Kusto connection string built. {cluster_uri}, {database_name}, {table_name}, {client_id}, {client_secret}, {tenant_id}")
 
         # Create ingestion client
         ingest_client = QueuedIngestClient(kcsb)

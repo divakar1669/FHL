@@ -1,3 +1,4 @@
+import logging
 import os
 import json
 from openai import AzureOpenAI
@@ -15,14 +16,17 @@ client = AzureOpenAI(
     api_version=AZURE_OPENAI_API_VERSION
 )
 
-def summarize_and_tag(post_data):
+def summarize_and_tag(post_data: dict) -> (str, list):
     """
     Summarize a Teams post (including replies) and generate tags using Azure OpenAI.
     """
-
-    text = post_data.get("body", {}).get("content", "")
-    replies = " ".join([r["body"]["content"] for r in post_data.get("replies", [])])
-    full_text = ("Post :: " + text + " Replies :: " + replies).strip()
+    logging.info(f"Summarizing and tagging post data: {post_data}") 
+    text = post_data.get("post", {})
+    replies = post_data.get("replies", [])
+    # Convert post and replies to a single string
+    post_str = str(text)
+    replies_str = " ".join([str(reply) for reply in replies])
+    full_text = f"Post :: {post_str} Replies :: {replies_str}".strip()
 
     prompt = f"""
     You are given a Microsoft Teams conversation (post and replies).
@@ -43,7 +47,7 @@ def summarize_and_tag(post_data):
         Categories:
             - Pipelines & Build: [PR Wait Time, PR Completion Time, PR Last Iteration Reliability, PR Pipeline Experience, CI Pipeline Experience, Patch Pipeline Experience, PR, CI & Patch Pipeline Reliability, Build Reliability and Correctness, Build Infrastructure, Artifact Lead Time, Build & Dependencies, Pipeline Management, Publishing to NPM/Nuget]
 
-            - Reliability & Performance: [Outer Loop Performance, Inner-Loop yarn start, CI Perf, Codespaces Reliability, Codespaces Stability, Deployment Pipeline Reliability, Test Automation, Flaky Test Detection & Triage, Non-Intentional Visual Diffs in PR, Live Site]
+            - Reliability & Performance: [Outer Loop Performance, Inner-Loop Performance, yarn start, yarn install, yarn fast, CI Perf, Codespaces Reliability, Codespaces Stability, Deployment Pipeline Reliability, Test Automation, Flaky Test Detection & Triage, Non-Intentional Visual Diffs in PR, Live Site]
 
             - Developer Experience: [GitHub Copilot Usage, VS Code IntelliSense/Debugging Experience, Create New Packages, Getting Started with 1JS, 1JS Documentation, 1JS Onboarding, Deployment and AI-Assisted Development]
 
@@ -53,13 +57,13 @@ def summarize_and_tag(post_data):
 
             - Codespaces: [Codespaces, Pipelines & Dev Environments]
             
-            - Miscellaneous: [AGILITY, SAD, OCE Rotation & Training, yarn start, yarn install, yarn fast, 1DAG, Others]
+            - Miscellaneous: [AGILITY, SAD, OCE Rotation & Training, 1DAG, Others]
     
     Output format:  
     Very important Respond only in JSON structure as mentioned below without any additional text or formatting :
     {{
         "summary": "...",
-        "tags": ["tag1", "tag2", "tag3"]
+        "tags": ["tag1", "tag2"]
     }}
     """
 
@@ -70,8 +74,8 @@ def summarize_and_tag(post_data):
              
              You are an expert assistant that summarizes and classifies Microsoft Teams conversations. 
                 Your goals: 
-                1. Always produce a clear, single-sentence summary that captures the full meaning of the conversation (post + replies). 
-                2. Act as a strict classifier: assign 1–3 tags only from the approved taxonomy of categories and tags provided. 
+                1. Always produce a clear, single-sentence summary that captures the full meaning of the conversation (More Weighage to the post and less to the reply). 
+                2. Act as a strict classifier: assign 1-2 tags only from the approved taxonomy of categories and tags provided. 
                 3. Be deterministic and consistent in tagging — never invent new tags, never miss obvious matches, and prefer the most specific tag(s). 
                 4. If none of the tags match, return "others". 
                 5. Output only valid JSON as instructed — no explanations, no extra text. 
@@ -79,8 +83,7 @@ def summarize_and_tag(post_data):
              """},
             
             {"role": "user", "content": prompt}
-        ],
-        temperature=0.3
+        ]
     )
 
     content = response.choices[0].message.content
