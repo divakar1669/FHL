@@ -33,8 +33,8 @@ def insertData(json_data: dict) -> func.HttpResponse:
         logging.info(f"Kusto configuration set. {cluster_uri}, {database_name}, {table_name}, {client_id}, {client_secret}, {tenant_id}")
 
         # Authentication
-        kcsb = KustoConnectionStringBuilder.with_aad_application_key_authentication(
-            cluster_uri, client_id, client_secret, tenant_id
+        kcsb = KustoConnectionStringBuilder.with_aad_managed_service_identity_authentication(
+            cluster_uri
         )
         
         logging.info(f"Kusto connection string built. {cluster_uri}, {database_name}, {table_name}, {client_id}, {client_secret}, {tenant_id}")
