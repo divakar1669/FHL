@@ -39,24 +39,27 @@ def summarize_and_tag(post_data: dict) -> (str, list):
         - Do not use bullet points or fragments.
         - Keep it concise and human-readable.
 
-        2. Assign 1–3 tags that categorize the topic of the conversation. 
-        - You MUST choose only from the tag list below. 
-        - If no suitable tag is found, return "others".
+        2. Assign 1–3 tags that describe the conversation. 
+        - Use the main category and the sub-category from the list below. 
+        - Include both main category and sub-category as separate strings in the list in the tags array. 
+        - If multiple tags are relevant, choose the most specific ones.
+        - If no suitable tag is found, return ["Others"].
         
     Tag List: 
         Categories:
-            Reliability
-            PR Pipeline
-            Performance
+            Reliability - [ Outer Loop , Inner-Loop ,Codespaces Reliability, Codespaces Stability, Deployment Pipeline Reliability, Flaky Test Detection & Triage, Non-Intentional Visual Diffs in PR, Live Site]
+            Performance - [ yarn start , yarn fast , yarn test , yarn install , CI Perf ]
+            PR Pipeline - [ 1PipeLine PR , 1Pipeline CI , E2E Test Pipeline , Other Pipeline Issues ]  
             Codespaces
-            Test Automation
-            Build and Release
+            Test Automation - [ E2E Tests , Unit Tests , Component Tests , Flaky Tests , Test Coverage ]
+            Build and Release   
             Security
             Publish Npm /NuGet Packages
-            Documentation
+            1JS - Documentation
             Git Operations
             Others
             Not Related to 1JS
+            
     
     Output format:  
     Very important Respond only in JSON structure as mentioned below without any additional text or formatting :
