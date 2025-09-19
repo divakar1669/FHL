@@ -5,6 +5,7 @@ import azure.functions as func
 from services.db_util import insertData
 from services.serviceUtils import extract_text_from_html
 from services.llm_api import summarize_and_tag
+from datetime import datetime
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -79,8 +80,19 @@ def create_summary_and_tags(req: func.HttpRequest) -> func.HttpResponse:
 
         logging.info(f"Main post - id: {post_id}, author: {author}, dateTime: {date_time}, url: {url}")
         # Get the dateTime of the first reply if available
-        first_reply_time = replies[0].get("createdDateTime") if replies and "createdDateTime" in replies[0] else "No replies"
-        logging.info(f"First reply dateTime: {first_reply_time}")
+        def parse_datetime(dt_str):
+            try:
+                return datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+            except Exception:
+                return None
+
+        if replies:
+            reply_times = [parse_datetime(reply.get("createdDateTime")) for reply in replies if reply.get("createdDateTime")]
+            reply_times = [rt for rt in reply_times if rt is not None]
+            first_reply_time = min(reply_times).isoformat() + "Z" if reply_times else "No replies"
+        else:
+            first_reply_time = date_time
+        logging.info(f"First reply dateTime: {first_reply_time} , createdTime of post: {date_time}")
         # Extract replies details
         reply_summaries = []
         for reply in replies:
@@ -88,7 +100,6 @@ def create_summary_and_tags(req: func.HttpRequest) -> func.HttpResponse:
             reply_id = reply.get("id")
             reply_author = reply["from"]["user"]["displayName"] if reply.get("from") and reply["from"].get("user") and reply["from"]["user"].get("displayName") else "Unknown"
             reply_date_time = reply.get("createdDateTime")
-            first_reply_time = min(first_reply_time, reply_date_time) if first_reply_time != "No replies" else reply_date_time
             reply_content = reply.get("body", {}).get("content", "")
             reply_summaries.append({
             "author": reply_author,
@@ -120,6 +131,7 @@ def create_summary_and_tags(req: func.HttpRequest) -> func.HttpResponse:
         dbData['GroupTag'] = group_tag
         dbData['AdoWorkItemUrl'] = "https://dev.azure.com/org/proj/_workitems/edit/101"
         dbData['MessageId'] = post_id
+        dbData['FirstResponseTime'] = first_reply_time
         
         
         
