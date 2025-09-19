@@ -75,16 +75,21 @@ def create_summary_and_tags(req: func.HttpRequest) -> func.HttpResponse:
         date_time = post.get("dateTime")
         content = extract_text_from_html(post.get("content") or "")
         url = post.get("url")
+        title = post.get("subject", "No Title")
 
         logging.info(f"Main post - id: {post_id}, author: {author}, dateTime: {date_time}, url: {url}")
-
+        # Get the dateTime of the first reply if available
+        first_reply_time = replies[0].get("createdDateTime") if replies and "createdDateTime" in replies[0] else "No replies"
+        logging.info(f"First reply dateTime: {first_reply_time}")
         # Extract replies details
         reply_summaries = []
         for reply in replies:
+            
             reply_id = reply.get("id")
-            reply_author = reply.get("author")
-            reply_date_time = reply.get("dateTime")
-            reply_content = reply.get("content")
+            reply_author = reply["from"]["user"]["displayName"] if reply.get("from") and reply["from"].get("user") and reply["from"]["user"].get("displayName") else "Unknown"
+            reply_date_time = reply.get("createdDateTime")
+            first_reply_time = min(first_reply_time, reply_date_time) if first_reply_time != "No replies" else reply_date_time
+            reply_content = reply.get("body", {}).get("content", "")
             reply_summaries.append({
             "author": reply_author,
             "dateTime": reply_date_time,
@@ -95,13 +100,15 @@ def create_summary_and_tags(req: func.HttpRequest) -> func.HttpResponse:
                         'author': author,
                         'dateTime': date_time,
                         'content': content,
+                        'title': title,
+                        'url': url
                     },
                     'replies': reply_summaries
                    }
         logging.info(f"Compiled JSON data for LLM: {json_data}")
         
         # call LLM API here with json_data and get summary and tags
-        summary, tags = summarize_and_tag(json_data)
+        summary, tags, group_tag = summarize_and_tag(json_data)
         logging.info(f"LLM response - Summary: {summary}, Tags: {tags}")
         dbData = dict()
         dbData['ShortDescription'] = summary
@@ -110,16 +117,17 @@ def create_summary_and_tags(req: func.HttpRequest) -> func.HttpResponse:
         dbData['TeamsLink'] = url
         dbData['ChannelId'] = author
         dbData['CreationTime'] = post.get("dateTime")
-        dbData['GroupTag'] = "group tag"
+        dbData['GroupTag'] = group_tag
         dbData['AdoWorkItemUrl'] = "https://dev.azure.com/org/proj/_workitems/edit/101"
         dbData['MessageId'] = post_id
+        
         
         
         # insert into db
         logging.info(f"Data inserted into DB: {dbData}")
         return insertData(dbData)
     except ValueError:
-        return func.HttpResponse("Invalid JSON in request body.", status_code=400)
+        return func.HttpResponse(f"Invalid JSON in request body. {dbData}", status_code=400)
     except Exception as e:
         logging.error(f"Error processing request: {str(e)}")
         return func.HttpResponse(f"Error: {str(e)}", status_code=500)
